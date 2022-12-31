@@ -9,8 +9,10 @@
             [clojure.pprint :refer [pprint]]
             [cheshire.core :as json]
             [telegrambot-lib.core :as tbot]
+            [tg-bot-framework.db :as db]
             [tg-bot-framework.bot :refer [mybot TGBOT]]
             [tg-bot-framework.dictonary :as dict]
+            [tg-bot-framework.actions :as act]
             [tg-bot-framework.handler :as h]))
 
 (defn handle
@@ -23,7 +25,8 @@
         chat-id (or (get-in upd [:message :chat :id]) (get-in upd [:callback_query :from :id]))
         roles (db/get-user-roles chat-id)
         state (db/get-user-state chat-id)]
-    (TGBOT h/struct))
+   ;; (TGBOT (eval h/struct))))
+    (TGBOT {"START" {nil {:else #(act/send-ads %)}}})))
 
 
 (def api-routes

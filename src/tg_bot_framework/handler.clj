@@ -70,4 +70,4 @@
 
 (def struct
   "TODO: Fixme"
-  {"START" {nil {:else act/send-ads}}})
+  {"START" {nil {:else (partial act/send-ads)}}})
