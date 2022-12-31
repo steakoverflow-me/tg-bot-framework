@@ -25,8 +25,8 @@
         chat-id (or (get-in upd [:message :chat :id]) (get-in upd [:callback_query :from :id]))
         roles (db/get-user-roles chat-id)
         state (db/get-user-state chat-id)]
-   ;; (TGBOT (eval h/struct))))
-    (TGBOT {"START" {nil {:else #(act/send-ads %)}}})))
+    (TGBOT (eval h/struct))))
+    ;;(TGBOT {"START" {nil {:else act/send-ads}}})))
 
 
 (def api-routes
