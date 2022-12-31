@@ -8,4 +8,5 @@
 (defn get-user-state
   "TODO: Fixme"
   [chat-id]
-  "START")
+  {:point "START"
+   :variables {:a "A"}})
