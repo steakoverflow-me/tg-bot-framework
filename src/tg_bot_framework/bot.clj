@@ -11,18 +11,17 @@
                :state {}}] ;;~(&env "state")}]
 
     `(cond
-       ~@(map (fn [state-point]
-               (map (fn [message-text]
-                      (map !(fn [callback-point]
-                             `((and
-                               ~(if (= :else state-point) true `(= (get-in ~p-map [:state :point]) state-point))
-                               ~(if (= :else message-text) true `(= (get-in ~p-map [:update :message :text]) message-text))
-                               ~(if (= :else callback-point) true `(= (get-in ~p-map [:update :callback_query :data :point]) callback-point)))
-                              (~(get-in struct [state-point message-text callback-point]) ~p-map)))
-                           (keys (get-in struct [state-point message-text]))))
-                    (keys (struct state-point))))
-             (keys struct))
+       ~(map (fn [state-point]
+                (map (fn [message-text]
+                       (map (fn [callback-point]
+                              `((and
+                                  ~(if (= :else state-point) true `(= (get-in ~p-map [:state :point]) ~state-point))
+                                  ~(if (= :else message-text) true `(= (get-in ~p-map [:update :message :text]) ~message-text))
+                                  ~(if (= :else callback-point) true `(= (get-in ~p-map [:update :callback_query :data :point]) ~callback-point)))
+                                (~(get-in struct [state-point message-text callback-point]) ~p-map)))
+                            (keys (get-in struct [state-point message-text]))))
+                     (keys (struct state-point))))
+              (keys struct))
 
        :else
-       (do (println "BAD!")
-           (throw (Exception. "No pattern!"))))))
+       (throw (Exception. "No pattern!")))))
