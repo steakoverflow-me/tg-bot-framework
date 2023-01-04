@@ -7,13 +7,15 @@
              [json :refer [wrap-json-body wrap-json-response]]]
             [clojure.string :as str]
             [clojure.pprint :refer [pprint]]
+            [clj-log4j2.core :as log]
             [cheshire.core :as json]
             [telegrambot-lib.core :as tbot]
             [tg-bot-framework.db :as db]
             [tg-bot-framework.bot :refer [mybot TGBOT]]
             [tg-bot-framework.dictonary :as dict]
             [tg-bot-framework.actions :as act]
-            [tg-bot-framework.handler :as h]))
+            [tg-bot-framework.handler :as h]
+            [tg-bot-framework.texts :as txts]))
 
 (defn prepare-update
   "Prepare update for macro &env"
@@ -27,6 +29,7 @@
         state (db/get-user-state chat-id)]
     {:incoming upd
      :chat-id chat-id
+     :w-role w-role
      :ch-role ch-role
      :state state}))
 
@@ -73,8 +76,7 @@
   (loop []
     (let [updates (poll-updates mybot @update-id)
           messages (:result updates)]
-HES
-      (println "LOOP STARTED!!!")
+      (log/info "New updates polleing loop iteration")
       ;; Check all messages, if any, for commands/keywords.
       (doseq [msg messages]
         (handle msg) ; your fn that decides what to do with each message.
@@ -93,10 +95,9 @@ HES
   (handle (assoc-in {} [:message :chat :id] chat-id)))
 
 (defmethod handle clojure.lang.PersistentArrayMap [upd-raw]
-  (println "------------>")
   (let [tgbot-env (prepare-update upd-raw)]
     ;; TODO: Fixme!
     (TGBOT
-     {"START"       {txts/dishes-list {:else "DISHES:LIST"}
+     {"START"       {txts/dishes-list {:else ["DISHES:LIST"]}
                      :else            {:else act/main-menu}}
       "DISHES:LIST" {:else            {:else act/dishes-list}}})))

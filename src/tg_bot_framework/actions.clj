@@ -10,6 +10,10 @@
   (let [clean-coll (remove empty? coll)]
     (map #(if (vector? %) (rrm-nil %) %) clean-coll)))
 
+(defn forbidden [{:keys [chat-id]}]
+  tbot/send-message mybot {:chat_id chat-id
+                           :text "🚧 *FORBIDDEN !!!* 🚧"})
+
 (defn main-menu
   [{:keys [incoming chat-id w-role]}]
   (tbot/send-message mybot

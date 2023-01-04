@@ -6,7 +6,7 @@
 
   :min-lein-version "2.9.10"
   :dependencies [[org.clojure/clojure "1.11.1"]
-                 [org.clojure/tools.logging "1.2.4"]
+                 [clj-log4j2 "0.4.0"]
 
                  [compojure "1.7.0"]
                  [ring/ring-core "1.9.5"]
@@ -25,5 +25,4 @@
   :main ^:skip-aot tg-bot-framework.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all
-                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"
-                                  "-Dclojure.tools.logging.factory=clojure.tools.logging.impl/slf4j-factory"]}})
+                       :jvm-opts ["-Dclojure.compiler.direct-linking=true"]}})

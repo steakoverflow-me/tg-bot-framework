@@ -1,6 +1,6 @@
 (ns tg-bot-framework.db
   (:require [neo4j-clj.core :refer [connect get-session]]
-            [clojure.tools.logging :as log]
+            [clj-log4j2.core :as log]
             [tg-bot-framework.queries :as q])
   (:import (java.net URI)))
 
@@ -11,9 +11,9 @@
 
 (defmacro WS [body]
   `(with-open [~'s (get-session neo4j)]
-     (log/debug (str "Neo4j request from:\t" '~@(next &form)))
-     (let [~'result (doall ~body)]
-       (log/debug (str "Neo4j response:\t" ~'result))
+     (log/debug (str "Neo4j request from: " '~@(next &form)))
+     (let [~'result (into [] ~body)]
+       (log/debug (str "Neo4j response: " ~'result))
        ~'result)))
 
 ;; ROLES
