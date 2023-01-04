@@ -19,3 +19,6 @@
                       :parse_mode "MarkdownV2"
                       :reply_markup {:keyboard (rrm-nil [(ch-role :admin [{:text txts/dishes-list}])])
                                      :resize_keyboard true}})))
+
+(defn dishes-list
+  [{:keys []}])

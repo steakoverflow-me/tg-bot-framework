@@ -96,4 +96,5 @@
   (let [tgbot-env (prepare-update upd-raw)]
     ;; TODO: Fixme!
     (TGBOT
-     {"START" {:else {:else act/home-menu}}})))
+     {"START" {:else            {:else act/home-menu}
+               txts/dishes-list {:else act/dishes-list}}})))
