@@ -10,15 +10,31 @@
   (let [clean-coll (remove empty? coll)]
     (map #(if (vector? %) (rrm-nil %) %) clean-coll)))
 
-(defn home-menu
-  [{:keys [incoming chat-id ch-role]}]
-  (println "INCOMING:\t" incoming)
-  (println (tbot/send-message mybot
+(defn main-menu
+  [{:keys [incoming chat-id w-role]}]
+  (tbot/send-message mybot
                      {:chat_id chat-id
                       :text "*Hello\\!* Let's go\\!"
                       :parse_mode "MarkdownV2"
-                      :reply_markup {:keyboard (rrm-nil [(ch-role :admin [{:text txts/dishes-list}])])
-                                     :resize_keyboard true}})))
+                      :reply_markup {:keyboard (rrm-nil [(w-role :admin [{:text txts/dishes-list}])])
+                                     :resize_keyboard true}}))
+
+(defn create-dishes-list-row [dish]
+  [{:text (str (:dish_category_pict dish) " " (:name dish) " " (:status_pict dish))
+    :callback_data (json/generate-string {:p "DISHES:VIEW" :vs {:uuid (:uuid dish)}})}])
 
 (defn dishes-list
-  [{:keys []}])
+  [{:keys [chat-id ch-role]}]
+  (ch-role :admin (let [dishes (db/get-dishes-list)
+                        rows (map create-dishes-list-row dishes)]
+                    (tbot/send-message mybot
+                                       {:chat_id chat-id
+                                        :text "*DISHES LIST*"
+                                        :parse_mode "MarkdownV2"
+                                        :reply_markup {:keyboard [{:text txts/dishes-add}
+                                                                  {:text txts/main-menu}]
+                                                       :resize_keyboard true}})
+                    (tbot/send-message mybot
+                                       {:chat_id chat-id
+                                        :text (str (count rows) " total")
+                                        :reply_markup {:inline_keyboard rows}}))))

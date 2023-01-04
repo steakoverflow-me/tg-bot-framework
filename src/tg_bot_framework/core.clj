@@ -22,7 +22,8 @@
               (update upd-raw [:callback_query :data] #(json/parse-string % true))
               upd-raw)
         chat-id (or (get-in upd [:message :chat :id]) (get-in upd [:callback_query :from :id]))
-        ch-role (fn [role body] (when (some #{role} (db/get-user-roles chat-id)) body))
+        w-role (fn [role body] (when (some #{role} (db/get-user-roles chat-id)) body))
+        ch-role (fn [role body] (if (some #{role} (db/get-user-roles chat-id)) body (act/forbidden chat-id)))
         state (db/get-user-state chat-id)]
     {:incoming upd
      :chat-id chat-id
@@ -72,7 +73,7 @@
   (loop []
     (let [updates (poll-updates mybot @update-id)
           messages (:result updates)]
-
+HES
       (println "LOOP STARTED!!!")
       ;; Check all messages, if any, for commands/keywords.
       (doseq [msg messages]
@@ -96,5 +97,6 @@
   (let [tgbot-env (prepare-update upd-raw)]
     ;; TODO: Fixme!
     (TGBOT
-     {"START" {:else            {:else act/home-menu}
-               txts/dishes-list {:else act/dishes-list}}})))
+     {"START"       {txts/dishes-list {:else "DISHES:LIST"}
+                     :else            {:else act/main-menu}}
+      "DISHES:LIST" {:else            {:else act/dishes-list}}})))
