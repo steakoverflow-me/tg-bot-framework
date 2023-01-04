@@ -15,19 +15,21 @@
             [tg-bot-framework.actions :as act]
             [tg-bot-framework.handler :as h]))
 
-(defn handle
-  "The main fn for an incoming `Update` object processing."
+(defn prepare-update
+  "Prepare update for macro &env"
   [upd-raw]
-  (println "------------>")
   (let [upd (if (some? (get-in upd-raw [:callback_query :data]))
-              (update-in upd-raw [:callback_query :data] #(json/parse-string % true))
+              (update upd-raw [:callback_query :data] #(json/parse-string % true))
               upd-raw)
         chat-id (or (get-in upd [:message :chat :id]) (get-in upd [:callback_query :from :id]))
-        roles (db/get-user-roles chat-id)
+        ch-role (fn [role body] (when (some #{role} (db/get-user-roles chat-id)) body))
         state (db/get-user-state chat-id)]
-    ;; (TGBOT (eval h/struct))))
-    (TGBOT {"START" {:else {:else act/send-ads}}})))
+    {:incoming upd
+     :chat-id chat-id
+     :ch-role ch-role
+     :state state}))
 
+(defmulti handle class)
 
 (def api-routes
   (POST "/" {update :body}
@@ -85,3 +87,13 @@
       ;; Wait a while before checking for updates again.
       (Thread/sleep 3000))
     (recur)))
+
+(defmethod handle java.lang.Long [chat-id]
+  (handle (assoc-in {} [:message :chat :id] chat-id)))
+
+(defmethod handle clojure.lang.PersistentArrayMap [upd-raw]
+  (println "------------>")
+  (let [tgbot-env (prepare-update upd-raw)]
+    ;; TODO: Fixme!
+    (TGBOT
+     {"START" {:else {:else act/home-menu}}})))

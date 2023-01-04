@@ -16,12 +16,11 @@
 
                  [telegrambot-lib "2.2.0"]
                  [cheshire "5.11.0"]
-                 [clj-time "0.15.2"]]
+                 [clj-time "0.15.2"]
                 ;; [clj-http "3.12.3"]
                 ;; [clj-pdf "2.6.1"]
 
-                ;; [org.clojure/java.jdbc "0.7.12"]
-                ;; [org.postgresql/postgresql "42.4.1"]]
+                 [gorillalabs/neo4j-clj "4.1.2"]]
 
   :main ^:skip-aot tg-bot-framework.core
   :target-path "target/%s"

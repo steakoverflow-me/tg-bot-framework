@@ -4,26 +4,22 @@
 
 (def mybot (tbot/create "5960181038:AAEEItibEfSyeUjJruK1w7InuUwr3gsDLIE"))
 
-(defmacro TGBOT [struct]
-  (let [p-map {:update ('upd &env)
-               :chat-id ('chat-id &env)
-               :roles ('roles &env)
-               :state ('state &env)}
-        cases (map (fn [state-point]
+(defmacro TGBOT [structure]
+  (let [cases (map (fn [state-point]
                      (map (fn [message-text]
                             (map (fn [callback-point]
                                    [`(and
-                                      ~(if (= :else state-point) true `(= (get-in (nth 3 [~@(keys &env)]) [:point]) ~state-point))
-                                      ~(if (= :else message-text) true `(= (get-in (first [~@(keys &env)]) [:message :text]) ~message-text))
-                                      ~(if (= :else callback-point) true `(= (get-in (first [~@(keys &env)]) [:callback_query :data :point]) ~callback-point)))
-                                     `(~(get-in struct [state-point message-text callback-point]) ~p-map)])
-                                 (keys (get-in struct [state-point message-text]))))
-                          (keys (struct state-point))))
-                   (keys struct))]
+                                      ~(if (= :else state-point) true `(= (get-in (second [~@(keys &env)]) [:state :point]) ~state-point))
+                                      ~(if (= :else message-text) true `(= (get-in (second [~@(keys &env)]) [:incoming :message :text]) ~message-text))
+                                      ~(if (= :else callback-point) true `(= (get-in (second [~@(keys &env)]) [:incoming :callback_query :data :point]) ~callback-point)))
+                                    `(~(get-in structure [state-point message-text callback-point]) (second [~@(keys &env)]))])
+                                 (keys (get-in structure [state-point message-text]))))
+                          (keys (get-in structure [state-point]))))
+                   (keys structure))]
 
     `(cond
        ~@(for [case (mapcat identity (mapcat identity (mapcat identity cases)))]
-          case)
+           case)
 
        :else
        (throw (Exception. "No pattern!")))))
