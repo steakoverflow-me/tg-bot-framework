@@ -1,6 +1,7 @@
 (ns tg-bot-framework.db
   (:require [neo4j-clj.core :refer [connect get-session]]
             [clj-log4j2.core :as log]
+            [cheshire.core :as json]
             [tg-bot-framework.queries :as q])
   (:import (java.net URI)))
 
@@ -23,11 +24,11 @@
 
 ;; STATE
 
-(defn get-user-state
-  "TODO: Fixme"
-  [chat-id]
-  {:point "START"
-   :variables {:a "A"}})
+(defn get-user-state [chat-id]
+  (WS (json/parse-string (q/get-user-state s {:chat_id chat-id}))))
+
+(defn set-user-state [chat-id state]
+  (WS (q/set-user-state s {:chat_id chat-id :state (json/generate-string state)})))
 
 ;; DISHES
 

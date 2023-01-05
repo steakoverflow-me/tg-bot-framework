@@ -35,6 +35,10 @@
 
 (defmulti handle class)
 
+(defn reprocess [chat-id state-point]
+  (db/set-user-state chat-id {:point state-point :variables {}})
+  (handle chat-id))
+
 (def api-routes
   (POST "/" {update :body}
         (let [op-result (handle update)]
@@ -98,6 +102,9 @@
   (let [tgbot-env (prepare-update upd-raw)]
     ;; TODO: Fixme!
     (TGBOT
-     {"START"       {txts/dishes-list {:else ["DISHES:LIST"]}
+     {"START"       {txts/dishes-list {:else ["DISHES:LIST" :admin]}
                      :else            {:else act/main-menu}}
       "DISHES:LIST" {:else            {:else act/dishes-list}}})))
+
+
+;; {"START" {txts/dishes-list {:else ["DISHES:LIST"]} :else {:else act/main-menu}} "DISHES:LIST" {:else {:else act/dishes-list}}}
