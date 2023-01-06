@@ -25,8 +25,9 @@
               upd-raw)
         chat-id (or (get-in upd [:message :chat :id]) (get-in upd [:callback_query :from :id]))
         w-role (fn [role body] (when (some #{role} (db/get-user-roles chat-id)) body))
-        ch-role (fn [role body] (if (some #{role} (db/get-user-roles chat-id)) body (act/forbidden chat-id)))
+        ch-role (fn [role body] (if (some #{role} (db/get-user-roles chat-id)) body ((act/forbidden chat-id)(reprocess chat-id "START"))))
         state (db/get-user-state chat-id)]
+    (log/debug (str "Got state of user " chat-id ": " state))
     {:incoming upd
      :chat-id chat-id
      :w-role w-role
@@ -35,9 +36,9 @@
 
 (defmulti handle class)
 
-(defn reprocess [chat-id state-point]
-  (db/set-user-state chat-id {:point state-point :variables {}})
-  (handle chat-id))
+(defn reprocess [chat-id state state-point var-path msg-txt]
+  (db/set-user-state chat-id {:point state-point :variables (if (some? var-path) (assoc-in (:variables state) (try (. Integer parseInt msg-txt) msg-txt) var-path) {})}
+  (handle chat-id)))
 
 (def api-routes
   (POST "/" {update :body}
@@ -69,7 +70,7 @@
    (let [resp (tbot/get-updates bot {:offset offset
                                      :timeout 10})]
      (if (contains? resp :error)
-       (println "tbot/get-updates error:" (:error resp))
+       (log/error "Error in updates polling: " (:error resp))
        resp))))
 
 ;; ^^^
@@ -80,7 +81,7 @@
   (loop []
     (let [updates (poll-updates mybot @update-id)
           messages (:result updates)]
-      (log/info "New updates polleing loop iteration")
+      (log/info "New updates polling loop iteration")
       ;; Check all messages, if any, for commands/keywords.
       (doseq [msg messages]
         (handle msg) ; your fn that decides what to do with each message.
@@ -99,12 +100,21 @@
   (handle (assoc-in {} [:message :chat :id] chat-id)))
 
 (defmethod handle clojure.lang.PersistentArrayMap [upd-raw]
+  (log/debug (str "Handling update: " upd-raw))
   (let [tgbot-env (prepare-update upd-raw)]
     ;; TODO: Fixme!
     (TGBOT
-     {"START"       {txts/dishes-list {:else ["DISHES:LIST" :admin]}
+     {:else {txts/main-menu {:else ["START"]}}
+      
+      "START"       {txts/dishes-list {:else ["DISHES:LIST" :admin]}
                      :else            {:else act/main-menu}}
-      "DISHES:LIST" {:else            {:else act/dishes-list}}})))
+      "DISHES:LIST" {txts/dishes-add  {:else ["DISHES:ADD:NAME" :admin]}
+                     :else            {:else act/dishes-list}}
+      "DISHES:ADD:NAME" {:text        {:else ["DISHES:ADD:DESCRIPTION" :admin [:name]]}
+                         :else        {:else act/dishes-add-name}}
+      "DISHES:ADD:DESCRIPTION" {:text {:else ["DISHES:ADD:PICTURE" :admin [:description]]}
+                                :else {:else act/dishes-add-description}}
+      "DISHES:ADD:PICTURE" {:image    {:else ["DISHES:ADD:PRICE" :admin [:picture]]}}})))
 
 
 ;; {"START" {txts/dishes-list {:else ["DISHES:LIST"]} :else {:else act/main-menu}} "DISHES:LIST" {:else {:else act/dishes-list}}}

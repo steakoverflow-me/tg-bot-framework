@@ -25,7 +25,7 @@
 ;; STATE
 
 (defn get-user-state [chat-id]
-  (WS (json/parse-string (q/get-user-state s {:chat_id chat-id}))))
+  (json/parse-string (:state (first (WS (q/get-user-state s {:chat_id chat-id})))) true))
 
 (defn set-user-state [chat-id state]
   (WS (q/set-user-state s {:chat_id chat-id :state (json/generate-string state)})))
