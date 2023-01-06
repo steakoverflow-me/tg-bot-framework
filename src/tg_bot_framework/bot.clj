@@ -3,8 +3,25 @@
 
 (def mybot (tbot/create "5960181038:AAEEItibEfSyeUjJruK1w7InuUwr3gsDLIE"))
 
-(defmacro TGBOT [structure]
-  (let [cases (map (fn [state-point]
+(defn convert-symbols [ch]
+  (let [s (str ch)]
+    (cond
+      (= s "{")
+      "(array-map "
+      (= s "}")
+      ")"
+      :else
+      s)))
+
+(defmacro TGBOT []
+  (let [structure (let [s0 (slurp "src/tg_bot_framework/structure.clj")
+                        s1 (do (println "S0\t" s0) (str s0))
+                        s2 (do (println "S1\t" s1) (map convert-symbols s1))
+                        s3 (do (println "S2\t" s2) (clojure.string/join s2))
+                        s4 (do (println "S3\t" s3) (read-string s3))]
+                    (println "S4\t" s4)
+                    s4)
+        cases (map (fn [state-point]
                      (map (fn [message]
                             (map (fn [callback-point]
                                    (do
@@ -65,3 +82,4 @@
 
            :else
            (throw (Exception. "No pattern!"))))))
+

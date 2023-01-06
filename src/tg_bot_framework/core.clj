@@ -110,12 +110,20 @@
 (defmethod handle java.lang.Long [chat-id]
   (handle (assoc-in {} [:message :chat :id] chat-id)))
 
-(defmethod handle clojure.lang.PersistentArrayMap [upd-raw]
-  (log/debug (str "Handling update: " upd-raw))
-  (let [tgbot-env (prepare-update upd-raw)]
-    ;; TODO: Fixme!
-    (TGBOT
-     {:else {txts/main-menu {:else ["START" [nil]]}}
+(defn convert-symbols [ch]
+  (let [s (str ch)]
+    (cond
+      (= s "{")
+      "(array-map "
+      (= s "}")
+      ")"
+      :else
+      s)))
+
+(defmacro convert-to-array-maps [body]
+  `(str/join (map convert-symbols (str '~body))))
+
+(def structure (convert-to-array-maps {:else {txts/main-menu {:else ["START" [nil]]}}
 
       "START"       {txts/dishes-list {:else ["DISHES:LIST" :admin [nil]]}
                      :else            {:else [act/main-menu]}}
@@ -133,8 +141,37 @@
       "DISHES:ADD:PRICE" {:number     {:else ["DISHES:ADD:APPROVE" :admin [:price]]}
                           :else       {:else [act/dishes-add-price]}}
       "DISHES:ADD:APPROVE" {txts/approve {:else [act/dishes-add-approved "DISHES:LIST" :admin [nil]]}
-                            :else        {:else [act/dishes-add-approve]}}}
-     )))
+                            :else        {:else [act/dishes-add-approve]}}}))
+
+(defmethod handle clojure.lang.PersistentArrayMap [upd-raw]
+  (log/debug (str "Handling update: " upd-raw))
+  (let [tgbot-env (prepare-update upd-raw)]
+    ;; TODO: Fixme!
+    (TGBOT)
+     ;; `(eval ~structure))))
+     ;;(convert-to-array-maps
+     ;;'{:els;; e {txts/main-menu {:else ["START" [nil]]}}
+
+     ;;  "START"       {txts/dishes-list {:else ["DISHES:LIST" :admin [nil]]}
+     ;;                 :else            {:else [act/main-menu]}}
+
+     ;;  "DISHES:LIST" {txts/dishes-add  {:else ["DISHES:ADD:NAME" :admin]}
+     ;;                 nil              {"DISHES:VIEW" ["DISHES:VIEW" :admin []]}
+     ;;                 :else            {:else [act/dishes-list]}}
+     ;;  "DISHES:VIEW" {:else            {:else [act/dishes-view]}}
+     ;;  "DISHES:ADD:NAME" {:text        {:else ["DISHES:ADD:DESCRIPTION" :admin [:name]]}
+     ;;                     :else        {:else [act/dishes-add-name]}}
+     ;;  "DISHES:ADD:DESCRIPTION" {:text {:else ["DISHES:ADD:PICTURE" :admin [:description]]}
+     ;;                            :else {:else [act/dishes-add-description]}}
+     ;;  "DISHES:ADD:PICTURE" {:image    {:else ["DISHES:ADD:PRICE" :admin [:picture]]}
+     ;;                        :else     {:else [act/dishes-add-picture]}}
+     ;;  "DISHES:ADD:PRICE" {:number     {:else ["DISHES:ADD:APPROVE" :admin [:price]]}
+     ;;                      :else       {:else [act/dishes-add-price]}}
+     ;;  "DISHES:ADD:APPROVE" {txts/approve {:else [act/dishes-add-approved "DISHES:LIST" :admin [nil]]}
+     ;;                        :else        {:else [act/dishes-add-approve]}}}
+     ;; ))
+))
+;;)
 
 
 ;; (clojure.pprint/pprint (macroexpand-1 '(TGBOT {"START" {txts/dishes-list {:else ["DISHES:LIST"]} :else {:else act/main-menu}} "DISHES:LIST" {:else {:else act/dishes-list}}})))
