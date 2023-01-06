@@ -17,6 +17,22 @@
             [tg-bot-framework.handler :as h]
             [tg-bot-framework.texts :as txts]))
 
+(defmulti handle class)
+
+(defn reprocess
+  ([chat-id state-point] (reprocess chat-id nil state-point nil nil))
+  ([chat-id state state-point var-path msg]
+   (db/set-user-state chat-id {:point state-point :variables (cond
+                                                               (and (some? var-path) (not (empty? var-path)) (nil? (first var-path)))
+                                                               {}
+                                                               (and (some? var-path) (not (empty? var-path)))
+                                                               (assoc-in (:variables state) (try (. Integer parseInt msg) msg) var-path)
+                                                               (and (some? var-path) (empty? var-path))
+                                                               msg
+                                                               :else
+                                                               (:variables state))}
+                      (handle chat-id))))
+
 (defn prepare-update
   "Prepare update for macro &env"
   [upd-raw]
@@ -25,7 +41,7 @@
               upd-raw)
         chat-id (or (get-in upd [:message :chat :id]) (get-in upd [:callback_query :from :id]))
         w-role (fn [role body] (when (some #{role} (db/get-user-roles chat-id)) body))
-        ch-role (fn [role body] (if (some #{role} (db/get-user-roles chat-id)) body ((act/forbidden chat-id)(reprocess chat-id "START"))))
+        ch-role (fn [role body] (if (or (nil? role) (some #{role} (db/get-user-roles chat-id))) body ((act/forbidden chat-id)(reprocess chat-id "START"))))
         state (db/get-user-state chat-id)]
     (log/debug (str "Got state of user " chat-id ": " state))
     {:incoming upd
@@ -33,12 +49,6 @@
      :w-role w-role
      :ch-role ch-role
      :state state}))
-
-(defmulti handle class)
-
-(defn reprocess [chat-id state state-point var-path msg-txt]
-  (db/set-user-state chat-id {:point state-point :variables (if (some? var-path) (assoc-in (:variables state) (try (. Integer parseInt msg-txt) msg-txt) var-path) {})}
-  (handle chat-id)))
 
 (def api-routes
   (POST "/" {update :body}
@@ -104,17 +114,26 @@
   (let [tgbot-env (prepare-update upd-raw)]
     ;; TODO: Fixme!
     (TGBOT
-     {:else {txts/main-menu {:else ["START"]}}
-      
-      "START"       {txts/dishes-list {:else ["DISHES:LIST" :admin]}
-                     :else            {:else act/main-menu}}
+     {:else {txts/main-menu {:else ["START" [nil]]}}
+
+      "START"       {txts/dishes-list {:else ["DISHES:LIST" :admin [nil]]}
+                     :else            {:else [act/main-menu]}}
+
       "DISHES:LIST" {txts/dishes-add  {:else ["DISHES:ADD:NAME" :admin]}
-                     :else            {:else act/dishes-list}}
+                     nil              {"DISHES:VIEW" ["DISHES:VIEW" :admin []]}
+                     :else            {:else [act/dishes-list]}}
+      "DISHES:VIEW" {:else            {:else [act/dishes-view]}}
       "DISHES:ADD:NAME" {:text        {:else ["DISHES:ADD:DESCRIPTION" :admin [:name]]}
-                         :else        {:else act/dishes-add-name}}
+                         :else        {:else [act/dishes-add-name]}}
       "DISHES:ADD:DESCRIPTION" {:text {:else ["DISHES:ADD:PICTURE" :admin [:description]]}
-                                :else {:else act/dishes-add-description}}
-      "DISHES:ADD:PICTURE" {:image    {:else ["DISHES:ADD:PRICE" :admin [:picture]]}}})))
+                                :else {:else [act/dishes-add-description]}}
+      "DISHES:ADD:PICTURE" {:image    {:else ["DISHES:ADD:PRICE" :admin [:picture]]}
+                            :else     {:else [act/dishes-add-picture]}}
+      "DISHES:ADD:PRICE" {:number     {:else ["DISHES:ADD:APPROVE" :admin [:price]]}
+                          :else       {:else [act/dishes-add-price]}}
+      "DISHES:ADD:APPROVE" {txts/approve {:else [act/dishes-add-approved "DISHES:LIST" :admin [nil]]}
+                            :else        {:else [act/dishes-add-approve]}}}
+     )))
 
 
-;; {"START" {txts/dishes-list {:else ["DISHES:LIST"]} :else {:else act/main-menu}} "DISHES:LIST" {:else {:else act/dishes-list}}}
+;; (clojure.pprint/pprint (macroexpand-1 (TGBOT {"START" {txts/dishes-list {:else ["DISHES:LIST"]} :else {:else act/main-menu}} "DISHES:LIST" {:else {:else act/dishes-list}}})))
