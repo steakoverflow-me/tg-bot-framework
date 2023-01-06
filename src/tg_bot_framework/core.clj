@@ -22,6 +22,7 @@
 (defn reprocess
   ([chat-id state-point] (reprocess chat-id nil state-point nil nil))
   ([chat-id state state-point var-path msg]
+   (log/debug (str "Reprocessing with arguments: " chat-id state state-point var-path msg))
    (db/set-user-state chat-id {:point state-point :variables (cond
                                                                (and (some? var-path) (not (empty? var-path)) (nil? (first var-path)))
                                                                {}
@@ -136,4 +137,4 @@
      )))
 
 
-;; (clojure.pprint/pprint (macroexpand-1 (TGBOT {"START" {txts/dishes-list {:else ["DISHES:LIST"]} :else {:else act/main-menu}} "DISHES:LIST" {:else {:else act/dishes-list}}})))
+;; (clojure.pprint/pprint (macroexpand-1 '(TGBOT {"START" {txts/dishes-list {:else ["DISHES:LIST"]} :else {:else act/main-menu}} "DISHES:LIST" {:else {:else act/dishes-list}}})))
