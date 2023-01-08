@@ -16,12 +16,18 @@
 (defquery get-dish
   "MATCH (s:Status)<-[:HAS_STATUS]-(d:Dish {uuid: $uuid})-[HAS_CATEGORY]->(dc:DishCategory) RETURN d{.*, status: s{.*}, dish_category: dc{.*}}")
 
-(defquery create-dish
-  "
+(defquery create-dish "
 MATCH (dc:DishCategory {id: $dish_category_id})
 MATCH (s:Status {id: 'active'})
 CREATE (d:Dish) SET d = $dish
 MERGE (s)<-[:HAS_STATUS]-(d)-[:HAS_CATEGORY]->(dc)")
+
+(defquery set-dish-status "
+MATCH (d:Dish {uuid: $uuid})
+MATCH (s:Status {id: $status_id})
+OPTIONAL MATCH (d)-[r:HAS_STATUS]->(:Status)
+MERGE (d)-[:HAS_STATUS]->(s)
+DELETE r")
 
 (defquery get-user-state
   "MATCH (p:Person {chat_id: $chat_id}) RETURN p.state AS state")

@@ -3,9 +3,12 @@
             [clojure.string :as str]))
 
 (defn dictonary-transform [coll]
-  (into {} (map (fn [row] {(keyword (:id row)) (remove :id row)}) coll)))
+  (into {} (map (fn [row] {(keyword (:id row)) (dissoc row :id)}) coll)))
 
-(def statuses (dictonary-transform (db/get-statuses)))
+(def statuses
+  (let [sts (dictonary-transform (db/get-statuses))]
+    (println "STATUSES:\t" sts)
+    sts))
 
 (def dish-categories (dictonary-transform (db/get-dish-categories)))
 

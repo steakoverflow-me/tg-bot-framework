@@ -52,3 +52,6 @@
 (defn create-dish [dish dish-category-id]
   (WS (q/create-dish s {:dish dish :dish_category_id dish-category-id})))
 
+(defn set-dish-status [uuid status]
+  (WS (q/set-dish-status s {:uuid uuid :status_id (name status)})))
+

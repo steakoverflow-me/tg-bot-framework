@@ -7,8 +7,8 @@
  "DISHES:LIST" {txts/dishes-add  {:else ["DISHES:ADD:CATEGORY" :admin]}
                 nil              {"DISHES:VIEW" ["DISHES:VIEW" :admin []]}
                 :else            {:else [act/dishes-list]}}
- "DISHES:VIEW" {txts/dishes-activate {:else [act/dishes-activate "DISHES:VIEW" :admin []]}
-                txts/dishes-disable  {:else [act/dishes-disable "DISHES:VIEW" :admin []]}
+ "DISHES:VIEW" {txts/dishes-activate {:else [act/dishes-activate "DISHES:LIST" :admin [nil]]}
+                txts/dishes-disable  {:else [act/dishes-disable "DISHES:LIST" :admin [nil]]}
                 :else            {:else [act/dishes-view]}}
  "DISHES:ADD:CATEGORY" {nil      {"DISHES:ADD:CATEGORY" ["DISHES:ADD:NAME" :admin [:dish-category]]}
                         :else    {:else [act/dishes-add-category]}}

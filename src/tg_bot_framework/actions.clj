@@ -38,7 +38,6 @@
                                        :reply_markup {:inline_keyboard rows}}))))
 
 (defn dishes-view [{:keys [chat-id ch-role state]}]
-  (println "\nUUID:\t" (db/get-dish (get-in state [:variables :uuid])) "\n!")
   (ch-role :admin (let [dish (db/get-dish (get-in state [:variables :uuid]))]
                     (utl/send-photo
                      {:chat_id chat-id
@@ -114,3 +113,15 @@
                         (utl/send-message {:chat_id chat-id
                                            :text (str "Dish *" (misc/escape-markdown2 (:name dish)) "* created!")
                                            :parse_mode "MarkdownV2"})))))
+
+(defn dishes-activate [{:keys [ch-role chat-id state]}]
+  (ch-role :admin (do (db/set-dish-status (get-in state [:variables :uuid]) :active)
+                      (utl/send-message {:chat_id chat-id
+                                         :text "Dish was *activated*\\!"
+                                         :parse_mode "MarkdownV2"}))))
+
+(defn dishes-disable [{:keys [ch-role chat-id state]}]
+  (ch-role :admin (do (db/set-dish-status (get-in state [:variables :uuid]) :disabled)
+                      (utl/send-message {:chat_id chat-id
+                                         :text "Dish was *disabled*\\!"
+                                         :parse_mode "MarkdownV2"}))))

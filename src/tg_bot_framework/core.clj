@@ -14,7 +14,6 @@
             [tg-bot-framework.bot :refer [mybot TGBOT]]
             [tg-bot-framework.dictonary :as dict]
             [tg-bot-framework.actions :as act]
-            [tg-bot-framework.handler :as h]
             [tg-bot-framework.texts :as txts]))
 
 (defmulti handle class)
