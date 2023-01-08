@@ -17,10 +17,13 @@
                  [telegrambot-lib "2.2.0"]
                  [cheshire "5.11.0"]
                  [clj-time "0.15.2"]
+                 [nano-id "1.0.0"]
                 ;; [clj-http "3.12.3"]
                 ;; [clj-pdf "2.6.1"]
 
-                 [gorillalabs/neo4j-clj "4.1.2"]]
+                 [gorillalabs/neo4j-clj "4.1.2"]
+
+                 [org.clojure/tools.namespace "1.3.0"]]
 
   :main ^:skip-aot tg-bot-framework.core
   :target-path "target/%s"

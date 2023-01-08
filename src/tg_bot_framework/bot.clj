@@ -15,17 +15,17 @@
 
 (defmacro TGBOT []
   (let [structure (let [s0 (slurp "src/tg_bot_framework/structure.clj")
-                        s1 (do (println "S0\t" s0) (str s0))
-                        s2 (do (println "S1\t" s1) (map convert-symbols s1))
-                        s3 (do (println "S2\t" s2) (clojure.string/join s2))
-                        s4 (do (println "S3\t" s3) (read-string s3))]
-                    (println "S4\t" s4)
-                    s4)
+                        s1 (str s0)
+                        s2 (map convert-symbols s1)
+                        s3 (clojure.string/join s2)
+                        s4 (read-string s3)
+                        s5 (eval s4)]
+                    s5)
         cases (map (fn [state-point]
                      (map (fn [message]
                             (map (fn [callback-point]
                                    (do
-                                   (println "STATE-POINT:\t" state-point "\tMESSAGE:\t" message "\tCALLBACK-POINT:\t" callback-point)
+                                     ;; (println "STATE-POINT:\t" state-point "\tMESSAGE:\t" message "\tCALLBACK-POINT:\t" callback-point)
                                    [`(and
                                       ~(if (= :else state-point) true `(= (get-in (second [~@(keys &env)]) [:state :point]) ~state-point))
                                       ~(cond
@@ -40,16 +40,17 @@
                                          `(not (nil? (get-in (second [~@(keys &env)]) [:incoming :message :location])))
                                          :else
                                          `(= (get-in (second [~@(keys &env)]) [:incoming :message :text]) ~message))
-                                      ~(if (= :else callback-point) true `(= (get-in (second [~@(keys &env)]) [:incoming :callback_query :data :p]) ~callback-point)))
+                                      ~(cond
+                                         (= :else callback-point) true
+                                         :else
+                                         `(= (get-in (second [~@(keys &env)]) [:incoming :callback_query :data :p]) ~callback-point)))
                                     `(~@(let [action (get-in structure [state-point message callback-point])
                                               point (first (filter string? action))
                                               role (first (filter keyword? action))
                                               path (first (filter vector? action))
                                               func (first (filter fn? action))]
 
-                                          `(do ;;(log/debug (str "Matched condition: " ~state-point " " ~message " " ~callback-point))
-                                               ;;(log/debug ~(str "Values: " point " - " role " - " path))
-                                               ((get-in (second [~@(keys &env)]) [:ch-role])
+                                          `(do ((get-in (second [~@(keys &env)]) [:ch-role])
                                                 ~role (do (when (some? ~func) (apply ~func [(second [~@(keys &env)])]))
                                                           (when (some? ~point) (tg-bot-framework.core/reprocess
                                                                                 (get-in (second [~@(keys &env)]) [:chat-id])
@@ -81,5 +82,6 @@
                case)
 
            :else
-           (throw (Exception. "No pattern!"))))))
+           (do (log/error (str "No pattern for " (second [~@(keys &env)])))
+               (act/not-implemented (second [~@(keys &env)])))))))
 

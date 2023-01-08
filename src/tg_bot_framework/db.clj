@@ -17,10 +17,20 @@
        (log/debug (str "Neo4j response: " ~'result))
        ~'result)))
 
+;; STATUSES
+
+(defn get-statuses []
+  (map :s (WS (q/get-statuses s))))
+
 ;; ROLES
 
 (defn get-user-roles [chat-id]
-  (WS (map (comp keyword :id) (q/get-user-roles s {:chat_id chat-id}))))
+  (map (comp keyword :id) (WS (q/get-user-roles s {:chat_id chat-id}))))
+
+;; DISH CATEGORIES
+
+(defn get-dish-categories []
+  (map :dc (WS (q/get-dish-categories s))))
 
 ;; STATE
 
@@ -28,10 +38,17 @@
   (json/parse-string (:state (first (WS (q/get-user-state s {:chat_id chat-id})))) true))
 
 (defn set-user-state [chat-id state]
+  (log/debug (format "Set state for user %d: %s" chat-id state))
   (WS (q/set-user-state s {:chat_id chat-id :state (json/generate-string state)})))
 
 ;; DISHES
 
 (defn get-dishes-list []
-  (WS (q/get-dishes-list s)))
+  (map :d (WS (q/get-dishes-list s))))
+
+(defn get-dish [uuid]
+  (:d (first (WS (q/get-dish s {:uuid uuid})))))
+
+(defn create-dish [dish dish-category-id]
+  (WS (q/create-dish s {:dish dish :dish_category_id dish-category-id})))
 

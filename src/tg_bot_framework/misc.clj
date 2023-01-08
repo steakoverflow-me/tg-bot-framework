@@ -44,9 +44,3 @@
   [timestamp]
   (cljtf/unparse datetime-formatter (cljtc/from-sql-time timestamp)))
 
-(defn check-role
-  "Check is `role` in `roles` (for usage as partial one)"
-  [roles role]
-  (let [rls (if (not (vector? role)) [role] role)]
-    (not (empty? (set/intersection (set roles) (set rls))))))
-
