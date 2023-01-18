@@ -1,5 +1,5 @@
 (ns tg-bot-framework.texts
-  (:require [tg-bot-framework.dictonary :as dict]))
+  (:require [tg-bot-framework.dictionary :as dict]))
 
 (def approve "👍 Approve")
 
