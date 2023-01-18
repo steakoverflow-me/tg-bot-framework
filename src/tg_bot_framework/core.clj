@@ -1,20 +1,15 @@
 (ns tg-bot-framework.core
-  (:require [compojure.core :as cmpj :refer [POST]]
-            [ring.adapter.jetty :refer [run-jetty]]
-            [ring.util.response :as resp]
-            [ring.middleware
-             [defaults :as rmd]
-             [json :refer [wrap-json-body wrap-json-response]]]
-            [clojure.string :as str]
-            [clojure.pprint :refer [pprint]]
+  (:require [cheshire.core :as json]
             [clj-log4j2.core :as log]
-            [cheshire.core :as json]
+            [compojure.core :as cmpj :refer [POST]]
+            (ring.middleware
+              [defaults :as rmd]
+              [json :refer [wrap-json-body wrap-json-response]])
+            [ring.util.response :as resp]
             [telegrambot-lib.core :as tbot]
-            [tg-bot-framework.db :as db]
-            [tg-bot-framework.bot :refer [mybot TGBOT]]
-            [tg-bot-framework.dictonary :as dict]
             [tg-bot-framework.actions :as act]
-            [tg-bot-framework.texts :as txts]))
+            [tg-bot-framework.bot :refer [TGBOT mybot]]
+            [tg-bot-framework.db :as db]))
 
 (defmulti handle class)
 

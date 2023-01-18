@@ -1,11 +1,9 @@
 (ns tg-bot-framework.actions
-  (:require [tg-bot-framework.db :as db]
-            [tg-bot-framework.dictonary :as dict]
-            [tg-bot-framework.texts :as txts]
-            [tg-bot-framework.utils :as utl]
+  (:require [nano-id.core :refer [nano-id]]
+            [tg-bot-framework.db :as db]
             [tg-bot-framework.misc :as misc]
-            [cheshire.core :as json]
-            [nano-id.core :refer [nano-id]]))
+            [tg-bot-framework.texts :as txts]
+            [tg-bot-framework.utils :as utl]))
 
 (defn forbidden [{:keys [chat-id]}]
   (db/set-user-state chat-id {:point "START" :variables {}})
@@ -50,7 +48,18 @@
                                 "*₹" (:price dish) "*")
                       :parse_mode "MarkdownV2"
                       :reply_markup {:resize_keyboard true
-                                     :keyboard [[(if (= (keyword (get-in dish [:status :id])) :active) {:text txts/dishes-disable} {:text txts/dishes-activate})]
+                                     :keyboard [[{:text txts/dishes-edit} (if (= (keyword (get-in dish [:status :id])) :active) {:text txts/dishes-disable} {:text txts/dishes-activate})]
+                                                [{:text txts/dishes-list} {:text txts/main-menu}]]}}))))
+
+(defn dishes-edit [{:keys [chat-id ch-role state]}]
+  (ch-role :admin (let [dish (db/get-dish (get-in state [:variables :uuid]))]
+                    (utl/send-message
+                     {:chat_id chat-id
+                      :text "What to *edit*?"
+                      :parse_mode "MarkdownV2"
+                      :reply_markup {:resize_keyboard true
+                                     :keyboard [[{:text txts/dishes-edit-name} {:text txts/dishes-edit-description}]
+                                                [{:text txts/dishes-edit-picture} {:text txts/dishes-edit-price}]
                                                 [{:text txts/dishes-list} {:text txts/main-menu}]]}}))))
 
 (defn dishes-add-category [{:keys [ch-role chat-id]}]

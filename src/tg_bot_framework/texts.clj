@@ -9,6 +9,16 @@
 
 (def dishes-add "➕ Add dish")
 
+(def dishes-edit "📝 Edit dish")
+
+(def dishes-edit-name "Edit name")
+
+(def dishes-edit-description "Edit description")
+
+(def dishes-edit-picture "Edit picture")
+
+(def dishes-edit-price "Edit price")
+
 (def dishes-activate (str (:pict (:active dict/statuses)) " Activate dish"))
 
 (def dishes-disable (str (:pict (:disabled dict/statuses)) " Disable dish"))

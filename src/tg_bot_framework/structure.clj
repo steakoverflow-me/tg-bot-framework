@@ -1,15 +1,16 @@
 {:else {txts/main-menu {:else ["START" [nil]]}
         txts/dishes-list {:else ["DISHES:LIST" :admin [nil]]}}
 
- "START"       {txts/dishes-list {:else ["DISHES:LIST" :admin [nil]]}
-                :else            {:else [act/main-menu]}}
+ "START"       {:else            {:else [act/main-menu]}}
 
  "DISHES:LIST" {txts/dishes-add  {:else ["DISHES:ADD:CATEGORY" :admin]}
                 nil              {"DISHES:VIEW" ["DISHES:VIEW" :admin []]}
                 :else            {:else [act/dishes-list]}}
- "DISHES:VIEW" {txts/dishes-activate {:else [act/dishes-activate "DISHES:LIST" :admin [nil]]}
+ "DISHES:VIEW" {txts/dishes-edit     {:else [act/dishes-edit "DISHES:EDIT" :admin []]}
+                txts/dishes-activate {:else [act/dishes-activate "DISHES:LIST" :admin [nil]]}
                 txts/dishes-disable  {:else [act/dishes-disable "DISHES:LIST" :admin [nil]]}
                 :else            {:else [act/dishes-view]}}
+ "DISHES:EDIT" {txts/dishes-edit}
  "DISHES:ADD:CATEGORY" {nil      {"DISHES:ADD:CATEGORY" ["DISHES:ADD:NAME" :admin [:dish-category]]}
                         :else    {:else [act/dishes-add-category]}}
  "DISHES:ADD:NAME" {:text        {:else ["DISHES:ADD:DESCRIPTION" :admin [:name]]}

@@ -1,4 +1,4 @@
-(defproject dlvrbot "0.1.1"
+(defproject tg-bot-framework "0.1.1"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
@@ -11,10 +11,10 @@
                  [compojure "1.7.0"]
                  [ring/ring-core "1.9.5"]
                  [ring/ring-jetty-adapter "1.9.5"]
-                 [ring/ring-defaults "0.3.3"]
+                 [ring/ring-defaults "0.3.4"]
                  [ring/ring-json "0.5.1"]
 
-                 [telegrambot-lib "2.2.0"]
+                 [telegrambot-lib "2.4.0"]
                  [cheshire "5.11.0"]
                  [clj-time "0.15.2"]
                  [nano-id "1.0.0"]

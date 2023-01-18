@@ -1,9 +1,7 @@
 (ns tg-bot-framework.misc
-  (:require [clojure.string :as str]
-            [clojure.set :as set]
-            [cheshire.core :as json]
+  (:require [clj-time.coerce :as cljtc]
             [clj-time.format :as cljtf]
-            [clj-time.coerce :as cljtc]))
+            [clojure.string :as str]))
 
 (defn get-message-text
   "Returns text from message or nil"
